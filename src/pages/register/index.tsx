@@ -66,3 +66,26 @@ export default function Register({ productsData, categories }: Props) {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const categoriesRef = collection(db, "categories");
+  const queryCategorySnapshot = await getDocs(categoriesRef);
+  const categories = queryCategorySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  const productsRef = collection(db, "products");
+  const queryProductSnapshot = await getDocs(productsRef);
+  const productsData = queryProductSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return {
+    props: {
+      productsData,
+      categories,
+    },
+  };
+};

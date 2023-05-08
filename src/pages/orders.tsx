@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CompanyModal } from "@/components/CompanyModal";
 import { useRouter } from "next/router";
-import { GetStaticProps } from "next";
+import { GetServerSideProps, GetStaticProps } from "next";
 import {
   collection,
   deleteDoc,
@@ -111,7 +111,7 @@ export default function Orders({ data }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const ordersRef = collection(db, "orders");
   const querySnapshot = await getDocs(ordersRef);
   const data = querySnapshot.docs.map((doc) => ({
