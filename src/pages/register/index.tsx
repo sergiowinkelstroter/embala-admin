@@ -9,6 +9,9 @@ import { CategoryForm } from "@/components/CategoryForm";
 import { toast } from "react-toastify";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { GetServerSideProps } from "next";
+import { Category } from "@/types/Category";
+import { NextSeo } from "next-seo";
 
 interface Props {
   productsData: Product[];
@@ -63,10 +66,6 @@ export default function Register({ productsData, categories }: Props) {
     </>
   );
 }
-
-import { GetServerSideProps } from "next";
-import { Category } from "@/types/Category";
-import { NextSeo } from "next-seo";
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const categoriesRef = collection(db, "categories");
