@@ -68,30 +68,20 @@ import { GetServerSideProps } from "next";
 import { Category } from "@/types/Category";
 import { NextSeo } from "next-seo";
 
-async function getAllProducts() {
-  const productsRef = collection(db, "products");
-  const querySnapshot = await getDocs(productsRef);
-  const products = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return products;
-}
-
-async function getAllCategories() {
-  const categoriesRef = collection(db, "categories");
-  const querySnapshot = await getDocs(categoriesRef);
-  const categories = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return categories;
-}
-
 export const getServerSideProps: GetServerSideProps = async () => {
-  const categories = await getAllCategories();
+  const categoriesRef = collection(db, "categories");
+  const queryCategorySnapshot = await getDocs(categoriesRef);
+  const categories = queryCategorySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 
-  const productsData = await getAllProducts();
+  const productsRef = collection(db, "products");
+  const queryProductSnapshot = await getDocs(productsRef);
+  const productsData = queryProductSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 
   return {
     props: {

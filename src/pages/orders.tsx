@@ -34,16 +34,20 @@ export default function Orders({ data }: Props) {
     Notification.requestPermission();
   }, []);
 
-  const q = query(collection(db, "orders"));
-  onSnapshot(q, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") {
-        if (window.Notification.permission === "granted") {
-          new Notification("Novo pedido!");
+  useEffect(() => {
+    const q = query(collection(db, "orders"));
+    onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          if (typeof Notification !== "undefined") {
+            if (Notification.permission === "granted") {
+              new Notification("Novo Pedido");
+            }
+          }
         }
-      }
+      });
     });
-  });
+  }, []);
 
   function handleCompany(company: Company) {
     setCompany(company);
@@ -107,18 +111,13 @@ export default function Orders({ data }: Props) {
   );
 }
 
-async function getAllOrders() {
+export const getStaticProps: GetStaticProps = async () => {
   const ordersRef = collection(db, "orders");
   const querySnapshot = await getDocs(ordersRef);
-  const orders = querySnapshot.docs.map((doc) => ({
+  const data = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
-  return orders;
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-  const data = await getAllOrders();
 
   return {
     props: {

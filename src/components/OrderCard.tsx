@@ -53,7 +53,7 @@ export function OrderCard({
                   className="flex flex-col mt-3 w-56 max-h-24"
                 >
                   <span className="text-sm">
-                    {product.quatity}x {product.type.toUpperCase()} de {""}
+                    {product.quantity}x {product.type.toUpperCase()} de {""}
                     {product.product.toUpperCase()}
                   </span>
                 </div>

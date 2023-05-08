@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Eye, EyeSlash, User } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { Loading } from "./Loading";
 
 export function LoginForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
@@ -17,6 +19,7 @@ export function LoginForm() {
   };
 
   function SignIn() {
+    setLoading(true);
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
@@ -31,6 +34,8 @@ export function LoginForm() {
         setEmail("");
         setPassword("");
       });
+
+    setLoading(false);
   }
 
   return (
@@ -61,7 +66,7 @@ export function LoginForm() {
         onClick={SignIn}
         className="bg-green-base rounded-md p-2 text-white font-bold hover:opacity-75 transition-opacity"
       >
-        Entrar
+        {loading ? <Loading /> : "Entrar"}
       </button>
     </div>
   );
