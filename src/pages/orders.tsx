@@ -1,12 +1,12 @@
-import { OrderCard } from "@/components/OrderCard";
 import { Company } from "@/types/Company";
 import { Order } from "@/types/Order";
 import { NotePencil } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CompanyModal } from "@/components/CompanyModal";
 import { useRouter } from "next/router";
-import { GetServerSideProps, GetStaticProps } from "next";
+
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import {
   collection,
   deleteDoc,
@@ -18,17 +18,18 @@ import {
 import { auth, db } from "@/lib/firebase";
 import { toast } from "react-toastify";
 import { signOut } from "firebase/auth";
+import {
+  useCollection,
+  useCollectionData,
+} from "react-firebase-hooks/firestore";
 import { NextSeo } from "next-seo";
+import { Loading } from "@/components/Loading";
 
-interface Props {
-  data: Order[];
-}
-
-export default function Orders({ data }: Props) {
+export default function Orders() {
   const [company, setCompany] = useState<Company | null>(null);
   const router = useRouter();
-
-  const [orders, setOrders] = useState<Order[]>(data);
+  const ordersRef = collection(db, "orders");
+  const [order, loading, error] = useCollection(ordersRef);
 
   useEffect(() => {
     Notification.requestPermission();
@@ -74,6 +75,11 @@ export default function Orders({ data }: Props) {
         toast.error("Algo de errado aconteceu! Tente novamente!");
       });
   }
+  const [open, setOpen] = useState(false);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <Dialog.Root>
@@ -88,14 +94,72 @@ export default function Orders({ data }: Props) {
         <div className="flex flex-col">
           <h2 className="text-xl mb-4">Pedidos:</h2>
           <div className="flex gap-4 flex-wrap">
-            {orders &&
-              orders.map((order) => (
-                <OrderCard
-                  order={order}
-                  key={order.id}
-                  onCompanyVisibile={handleCompany}
-                  onOrderDelivered={cancelOrder}
-                />
+            {order &&
+              order.docs.map((order, index) => (
+                <>
+                  <div className=" p-4 rounded-lg bg-yellow-base m-2 flex flex-col justify-between">
+                    <h1>
+                      Pedido para{" "}
+                      <Dialog.Trigger
+                        onClick={() => handleCompany(order.data().company)}
+                        className="underline hover:opacity-60 transition-opacity"
+                      >
+                        {order.data().company === null
+                          ? "N/A"
+                          : order.data().company.name}
+                      </Dialog.Trigger>
+                    </h1>
+                    <p className="my-2">
+                      Meio de pagamento: {order.data().methodPayment}
+                    </p>
+                    <AlertDialog.Root open={open} onOpenChange={setOpen}>
+                      Produtos:
+                      {order.data().products.map((product: any) => {
+                        return (
+                          <div
+                            key={product.type}
+                            className="flex flex-col mt-3 w-56 max-h-24"
+                          >
+                            <span className="text-sm">
+                              {product.quantity}x {product.type.toUpperCase()}{" "}
+                              de {""}
+                              {product.product.toUpperCase()}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <AlertDialog.Trigger className="bg-green-base rounded-md p-1 mt-6  border border-transparent  hover:border-white">
+                        Pedido entregue
+                        <AlertDialog.Portal>
+                          <AlertDialog.Overlay className="bg-black/60 inset-0 fixed" />
+                          <AlertDialog.Content className="fixed bg-green-base  py-6  px-5 md:px-10 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg  w-[250px] md:w-[380px] shadow-lg shadow-black/25 my-4">
+                            <AlertDialog.Title>
+                              Deseja confirmar que o pedido foi entregue para{" "}
+                              {order.data().company === null
+                                ? "N/A"
+                                : order.data().company.name}
+                              ?
+                            </AlertDialog.Title>
+                            <div className="flex gap-2 justify-between mt-4">
+                              <AlertDialog.Cancel
+                                asChild
+                                className=" p-2 rounded-md "
+                              >
+                                <button>Cancelar</button>
+                              </AlertDialog.Cancel>
+                              <AlertDialog.Action
+                                onClick={() => cancelOrder(order.id)}
+                                className="bg-yellow-base p-2 rounded-md border-2 hover:bg-transparent hover:transition-colors"
+                              >
+                                Confirmar
+                              </AlertDialog.Action>
+                            </div>
+                          </AlertDialog.Content>
+                        </AlertDialog.Portal>
+                      </AlertDialog.Trigger>
+                    </AlertDialog.Root>
+                  </div>
+                </>
               ))}
           </div>
         </div>
@@ -110,19 +174,3 @@ export default function Orders({ data }: Props) {
     </Dialog.Root>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const ordersRef = collection(db, "orders");
-  const querySnapshot = await getDocs(ordersRef);
-  const data = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  return {
-    props: {
-      data,
-    },
-    revalidate: 10,
-  };
-};

@@ -5,13 +5,18 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Category } from "@/types/Category";
 import { toast } from "react-toastify";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  DocumentData,
+  QueryDocumentSnapshot,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { v4 as uuid } from "uuid";
 
 interface ProductFormProps {
   onNewProduct: () => void;
-  categories: Category[];
+  categories: QueryDocumentSnapshot<DocumentData>[] | undefined;
 }
 
 export interface ProductFormData {
@@ -149,7 +154,7 @@ export function ProductForm({ onNewProduct, categories }: ProductFormProps) {
                 {categories?.map((category) => {
                   return (
                     <option value={category.id} key={category.id}>
-                      {category.name}
+                      {category.data().name}
                     </option>
                   );
                 })}
