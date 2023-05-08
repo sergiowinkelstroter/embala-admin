@@ -47,30 +47,22 @@ export default function Register({ productsData, categories }: Props) {
               <ProductCard key={product.name} product={product} />
             ))}
         </div>
+
+        <div className="flex flex-col gap-4">
+          <Dialog.Root open={openProduct} onOpenChange={setOpenProduct}>
+            <Dialog.Trigger className="bg-yellow-base p-3 w-44 h-12 rounded-lg flex items-center gap-2  border-transparent border-2 hover:border-yellow-base hover:text-yellow-base hover:bg-transparent transition-colors">
+              Novo Produto <PlusCircle size={28} />
+            </Dialog.Trigger>
+            <ProductForm onNewProduct={newProduct} categories={categories} />
+          </Dialog.Root>
+          <Dialog.Root open={openCategory} onOpenChange={setOpenCategory}>
+            <Dialog.Trigger className="bg-yellow-base p-3 w-44 h-12 rounded-lg flex items-center gap-2  border-transparent border-2 hover:border-yellow-base hover:text-yellow-base hover:bg-transparent transition-colors">
+              Nova Categoria <PlusCircle size={28} />
+            </Dialog.Trigger>
+            <CategoryForm open={() => setOpenCategory(false)} />
+          </Dialog.Root>
+        </div>
       </div>
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const categoriesRef = collection(db, "categories");
-  const queryCategorySnapshot = await getDocs(categoriesRef);
-  const categories = queryCategorySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  const productsRef = collection(db, "products");
-  const queryProductSnapshot = await getDocs(productsRef);
-  const productsData = queryProductSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  return {
-    props: {
-      productsData,
-      categories,
-    },
-  };
-};
