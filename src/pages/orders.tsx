@@ -35,10 +35,10 @@ export default function Orders({ data }: Props) {
   }, []);
 
   const q = query(collection(db, "orders"));
-  const unsubscribe = onSnapshot(q, (snapshot) => {
+  onSnapshot(q, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added") {
-        if (Notification.permission === "granted") {
+        if (window.Notification.permission === "granted") {
           new Notification("Novo pedido!");
         }
       }

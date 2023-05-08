@@ -1,5 +1,4 @@
 import { Order } from "@/types/Order";
-import { Product } from "@/types/Product";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 
 interface OrderDelivered {

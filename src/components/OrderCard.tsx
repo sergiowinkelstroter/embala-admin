@@ -4,7 +4,6 @@ import { Company } from "@/types/Company";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { OrderDelivered } from "./OrderDelivered";
 import { useState } from "react";
-import { DocumentData } from "firebase/firestore";
 
 interface OrderCardProps {
   order: Order;

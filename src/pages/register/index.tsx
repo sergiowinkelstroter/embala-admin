@@ -1,15 +1,14 @@
 import { Product } from "@/types/Product";
 import { ArrowLeft, PlusCircle } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ProductForm } from "@/components/ProductForm";
 import { ProductCard } from "@/components/ProductCard";
-import { api } from "@/lib/api";
 import { CategoryForm } from "@/components/CategoryForm";
 import { toast } from "react-toastify";
 import { db } from "@/lib/firebase";
-import { collection, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 interface Props {
   productsData: Product[];
@@ -31,6 +30,7 @@ export default function Register({ productsData, categories }: Props) {
 
   return (
     <>
+      <NextSeo title="Embala Brasil Admin | Produtos" />
       <div className="p-5 flex justify-between text-white">
         <button
           onClick={() => router.push("/orders")}
@@ -66,6 +66,7 @@ export default function Register({ productsData, categories }: Props) {
 
 import { GetServerSideProps } from "next";
 import { Category } from "@/types/Category";
+import { NextSeo } from "next-seo";
 
 async function getAllProducts() {
   const productsRef = collection(db, "products");

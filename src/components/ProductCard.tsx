@@ -2,16 +2,15 @@ import { Product } from "@/types/Product";
 import { Pencil, Trash } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { api } from "@/lib/api";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { DeleteProductModal } from "./DeleteProductModal";
 import { toast } from "react-toastify";
 import { FormEvent, useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import * as Photos from "../services/photo";
-import { Photo } from "@/types/Photo";
+import { deleteObject, ref } from "firebase/storage";
 
 interface ProductCardProps {
   product: Product;
@@ -20,16 +19,16 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const [image, setImage] = useState<FileList | null>();
   const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [photo, setPhoto] = useState<Photo | Error>();
 
   async function cancelProduct() {
-    const docRef = doc(db, "products", String(product.id));
+    const productRef = doc(db, "products", String(product.id));
 
-    deleteDoc(docRef)
+    const imageRef = ref(storage, `images/${product.id}`);
+
+    deleteDoc(productRef)
       .then(() => {
+        deleteObject(imageRef).then(() => {});
         toast.success("Produto excluido com sucesso!");
       })
       .catch(() => {
@@ -60,22 +59,22 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="bg-green-base flex flex-col justify-between border-2 border-yellow-base w-48 rounded-lg text-yellow-base p-3 ">
-      {product.image ? (
-        <Image
-          src={product.image.url}
-          unoptimized
-          alt=""
-          width={150}
-          height={100}
-        />
-      ) : (
-        <form method="POST" onSubmit={handleFormSubmit}>
-          <input type="file" name="image" />
-          <input type="submit" value="Enviar" />
-          {uploading && "Enviando..."}
-        </form>
-      )}
-      <div className="flex flex-col mb-4">
+      <div className="flex flex-col mb-4 justify-end h-full">
+        {product.image ? (
+          <Image
+            src={product.image.url}
+            unoptimized
+            alt=""
+            width={150}
+            height={100}
+          />
+        ) : (
+          <form method="POST" onSubmit={handleFormSubmit}>
+            <input type="file" name="image" />
+            <input type="submit" value="Enviar" className="" />
+            {uploading && "Enviando..."}
+          </form>
+        )}
         <h1 className="text-lg">{product.name.toUpperCase()}</h1>
 
         <span>
