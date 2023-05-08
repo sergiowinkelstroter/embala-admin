@@ -34,6 +34,21 @@ export default function Orders({ data }: Props) {
     Notification.requestPermission();
   }, []);
 
+  useEffect(() => {
+    const q = query(collection(db, "orders"));
+    onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          if (typeof Notification !== "undefined") {
+            if (Notification.permission === "granted") {
+              new Notification("Novo Pedido");
+            }
+          }
+        }
+      });
+    });
+  }, []);
+
   function handleCompany(company: Company) {
     setCompany(company);
   }

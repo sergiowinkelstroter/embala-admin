@@ -9,9 +9,9 @@ import { CategoryForm } from "@/components/CategoryForm";
 import { toast } from "react-toastify";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { GetServerSideProps } from "next";
 import { Category } from "@/types/Category";
 import { NextSeo } from "next-seo";
+import { GetServerSideProps } from "next";
 
 interface Props {
   productsData: Product[];
@@ -46,21 +46,6 @@ export default function Register({ productsData, categories }: Props) {
             products?.map((product) => (
               <ProductCard key={product.name} product={product} />
             ))}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Dialog.Root open={openProduct} onOpenChange={setOpenProduct}>
-            <Dialog.Trigger className="bg-yellow-base p-3 w-44 h-12 rounded-lg flex items-center gap-2  border-transparent border-2 hover:border-yellow-base hover:text-yellow-base hover:bg-transparent transition-colors">
-              Novo Produto <PlusCircle size={28} />
-            </Dialog.Trigger>
-            <ProductForm onNewProduct={newProduct} categories={categories} />
-          </Dialog.Root>
-          <Dialog.Root open={openCategory} onOpenChange={setOpenCategory}>
-            <Dialog.Trigger className="bg-yellow-base p-3 w-44 h-12 rounded-lg flex items-center gap-2  border-transparent border-2 hover:border-yellow-base hover:text-yellow-base hover:bg-transparent transition-colors">
-              Nova Categoria <PlusCircle size={28} />
-            </Dialog.Trigger>
-            <CategoryForm open={() => setOpenCategory(false)} />
-          </Dialog.Root>
         </div>
       </div>
     </>
