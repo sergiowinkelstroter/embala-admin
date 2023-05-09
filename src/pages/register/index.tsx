@@ -16,6 +16,7 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { deleteObject, ref } from "firebase/storage";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { DeleteProductModal } from "@/components/DeleteProductModal";
+import { Loading } from "@/components/Loading";
 
 export default function Register() {
   const [openProduct, setOpenProduct] = useState(false);
@@ -105,10 +106,15 @@ export default function Register() {
                     <form
                       method="POST"
                       onSubmit={(e) => handleFormSubmit(e, product.id)}
+                      className="flex flex-col my-5 gap-1"
                     >
                       <input type="file" name="image" />
-                      <input type="submit" value="Enviar" className="" />
-                      {uploading && "Enviando..."}
+                      <input
+                        type="submit"
+                        value="Enviar"
+                        className="bg-yellow-base text-green-base p-1 rounded-md cursor-pointer hover:opacity-70"
+                      />
+                      {uploading && <Loading />}
                     </form>
                   )}
                   <h1 className="text-lg">
