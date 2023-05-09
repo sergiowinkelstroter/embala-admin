@@ -8,32 +8,36 @@ import { Product } from "@/types/Product";
 import { toast } from "react-toastify";
 import { ProductFormData } from "@/components/ProductForm";
 import {
+  DocumentData,
   collection,
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { GetServerSideProps } from "next";
+import { GetStaticProps, GetStaticPaths } from "next";
 import { Loading } from "@/components/Loading";
 import { NextSeo } from "next-seo";
+import { useCollection } from "react-firebase-hooks/firestore";
 
-interface Props {
-  categories: Category[];
-  product: Product;
-  id: string;
-}
-
-export default function EditProduct({ categories, product, id }: Props) {
-  const { push, isFallback } = useRouter();
+export default function EditProduct() {
+  const { push, query } = useRouter();
+  const [product, setProduct] = useState<DocumentData>();
   const [status, setStatus] = useState("Ativo");
-
+  const categoriesRef = collection(db, "categories");
+  const [categories, loading, error] = useCollection(categoriesRef);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ProductFormData>({});
+  const id = query.id;
+
+  onSnapshot(doc(db, "products", String(id)), (doc) => {
+    setProduct(doc.data());
+  });
 
   async function editProduct(data: ProductFormData) {
     const product = {
@@ -41,20 +45,20 @@ export default function EditProduct({ categories, product, id }: Props) {
       ...data,
     };
 
-    const productRef = doc(db, "products", id);
+    const productRef = doc(db, "products", String(id));
     await updateDoc(productRef, product);
 
     await push("/register");
     toast.success("Produto editado com sucesso");
   }
 
-  if (isFallback) {
+  if (loading) {
     return <Loading />;
   }
 
   return (
     <>
-      <NextSeo title={`Embala Brasil Admin | ${product.name}`} />
+      <NextSeo title={`Embala Brasil Admin | ${product?.name}`} />
       <div className="p-5 text-white">
         <button
           onClick={() => push("/register")}
@@ -141,10 +145,10 @@ export default function EditProduct({ categories, product, id }: Props) {
                 className="bg-yellow-base p-2 rounded-md"
                 {...register("category", { required: true })}
               >
-                {categories?.map((category) => {
+                {categories?.docs.map((category) => {
                   return (
                     <option value={category.id} key={category.id}>
-                      {category.name}
+                      {category.data().name}
                     </option>
                   );
                 })}
@@ -189,40 +193,3 @@ export default function EditProduct({ categories, product, id }: Props) {
     </>
   );
 }
-
-async function getAllCategories() {
-  const categoriesRef = collection(db, "categories");
-  const querySnapshot = await getDocs(categoriesRef);
-  const categories = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return categories;
-}
-
-export const getServerSideProps: GetServerSideProps<
-  any,
-  { id: string }
-> = async ({ params }) => {
-  const id = params?.id;
-
-  const docRef = doc(db, "products", String(id));
-  const docSnap = await getDoc(docRef);
-
-  let product;
-
-  if (docSnap.exists()) {
-    product = docSnap.data();
-  } else {
-    console.log("No such document!");
-  }
-  const categories = await getAllCategories();
-
-  return {
-    props: {
-      product,
-      categories,
-      id,
-    },
-  };
-};
