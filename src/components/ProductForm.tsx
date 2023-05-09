@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import {
   DocumentData,
   QueryDocumentSnapshot,
+  Timestamp,
   addDoc,
   collection,
 } from "firebase/firestore";
@@ -47,6 +48,7 @@ export function ProductForm({ onNewProduct, categories }: ProductFormProps) {
         category: data.category,
         description: data.description,
         name: data.name,
+        createdAt: Timestamp.fromDate(new Date()),
         types: [
           { id: uuid(), name: data.types[0].name, price: data.types[0].price },
           { id: uuid(), name: data.types[1].name, price: data.types[1].price },
@@ -57,6 +59,8 @@ export function ProductForm({ onNewProduct, categories }: ProductFormProps) {
       setValue("name", "");
       setValue("description", "");
       setValue("category", "");
+      setValue("types.0", { name: "", id: "", price: 0 });
+      setValue("types.1", { name: "", id: "", price: 0 });
     } catch (error) {
       toast.error("Não foi possivel cadastrar o produto");
     }
